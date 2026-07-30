@@ -35,9 +35,13 @@ crm.gold     # dims / facts / funnel mart
 
 ## Quick start (Module 2 — Option B)
 
-1. Copy `.env.example` → `.env` (HubSpot token + SQL warehouse connection)
+1. Create local `.env` (gitignored) with:
+   - `HUBSPOT_TOKEN`
+   - `DATABRICKS_HOST`
+   - `DATABRICKS_HTTP_PATH`
+   - `DATABRICKS_TOKEN`
 2. `pip install -r requirements.txt`
 3. `python scripts/ingest_hubspot_local.py`
 4. Run verify SQL in [`notebooks/sql/02_verify_bronze.sql`](notebooks/sql/02_verify_bronze.sql)
 
-Token stays on laptop — never in Databricks notebooks.
+Token stays on laptop — never commit `.env`.

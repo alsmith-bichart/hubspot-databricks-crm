@@ -3,7 +3,7 @@
 
 Token never enters a Databricks notebook.
 Usage:
-  cp .env.example .env   # fill values
+  # create .env with HUBSPOT_TOKEN, DATABRICKS_HOST, DATABRICKS_HTTP_PATH, DATABRICKS_TOKEN
   pip install -r requirements.txt
   python scripts/ingest_hubspot_local.py
 """
@@ -86,7 +86,7 @@ def require_env(*keys: str) -> dict[str, str]:
     missing = [k for k in keys if not os.getenv(k)]
     if missing:
         print(f"Missing env vars: {', '.join(missing)}", file=sys.stderr)
-        print("Copy .env.example → .env and fill values.", file=sys.stderr)
+        print("Create .env with required keys (see README). .env is gitignored.", file=sys.stderr)
         sys.exit(1)
     return {k: os.environ[k] for k in keys}
 

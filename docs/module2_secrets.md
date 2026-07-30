@@ -17,7 +17,7 @@ crm.bronze.*  via SQL warehouse
 
 ## Setup
 
-1. Copy `.env.example` → `.env`
+1. Create local `.env` (gitignored) — see README for required keys
 2. Fill values (warehouse: Compute → SQL warehouse → Connection details)
 3. `python -m venv .venv && source .venv/bin/activate`
 4. `pip install -r requirements.txt`
