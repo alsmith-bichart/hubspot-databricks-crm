@@ -12,7 +12,36 @@ import os
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+# Databricks spark_python_task may exec() this file without defining __file__.
+try:
+    _SCRIPT_DIR = Path(__file__).resolve().parent
+except NameError:
+    _SCRIPT_DIR = None
+
+if _SCRIPT_DIR is not None:
+    ROOT = _SCRIPT_DIR.parent
+else:
+    cwd = Path.cwd().resolve()
+    ROOT = None
+    for candidate in (cwd, *cwd.parents):
+        if (candidate / "ingestion" / "__init__.py").is_file():
+            ROOT = candidate
+            break
+    if ROOT is None:
+        for arg in sys.argv:
+            p = Path(arg)
+            try:
+                p = p.resolve()
+            except OSError:
+                continue
+            if p.suffix == ".py" and p.parent.name == "scripts":
+                ROOT = p.parent.parent
+                break
+    if ROOT is None:
+        raise RuntimeError(
+            f"Cannot resolve repo root (cwd={cwd}, argv={list(sys.argv)!r})"
+        )
+
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -76,5 +105,10 @@ def main() -> None:
     apply_ddl(catalog=args.catalog, bronze_schema=args.bronze_schema)
 
 
-if __name__ == "__main__":
+try:
+    _has_file = bool(__file__)
+except NameError:
+    _has_file = False
+
+if __name__ == "__main__" or not _has_file:
     main()
