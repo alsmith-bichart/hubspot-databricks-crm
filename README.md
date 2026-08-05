@@ -1,47 +1,32 @@
-# HubSpot CRM Funnel Lakehouse
+# HubSpot → Databricks CRM
 
-Crash course project: HubSpot → Databricks (Unity Catalog medallion) with custom notebook ingest, gold funnel mart, data contracts, and Jobs.
+Bronze ingest (HubSpot → Unity Catalog) with Git-managed UC DDL and Databricks Jobs.
 
-## Layout
+## Branches & environments
 
-```text
-notebooks/     Databricks SQL / Python labs
-contracts/     ODCS data contracts
-dags/          Optional Airflow (Module 7)
-docs/          Metric dictionary
+| Branch | Bundle target | UC catalog |
+|---|---|---|
+| `dev` | `dev` | `crm_dev.bronze` |
+| `main` | `prod` | `crm.bronze` |
+
+Same Databricks workspace; catalogs isolate data. Only `main` deploys to prod (`crm`).  
+Secrets: repo-level Actions secrets (no GitHub Environments).
+
+## Docs
+
+See [docs/README.md](docs/README.md).
+
+## Quick start
+
+```bash
+pip install -r requirements.txt
+# fill configs/.env (gitignored)
+
+# Prod catalog
+python scripts/apply_uc_ddl.py --catalog crm
+python scripts/ingest_bronze.py --catalog crm
+
+# Dev catalog (isolated)
+python scripts/apply_uc_ddl.py --catalog crm_dev
+python scripts/ingest_bronze.py --catalog crm_dev
 ```
-
-## UC target
-
-```text
-crm.bronze   # raw HubSpot land
-crm.silver   # cleaned entities
-crm.gold     # dims / facts / funnel mart
-```
-
-## Modules
-
-| Module | Focus |
-|--------|--------|
-| 0 | Free Edition + HubSpot token |
-| 1 | UC catalog/schemas |
-| 2 | Custom HubSpot API → bronze |
-| 3 | Silver entities |
-| 4 | Gold star + funnel |
-| 5 | Data contracts |
-| 6 | Databricks Jobs |
-| 7 | Optional Airflow |
-| 8 | Metrics / DQ / gold-only grants |
-
-## Quick start (Module 2 — Option B)
-
-1. Create local `.env` (gitignored) with:
-   - `HUBSPOT_TOKEN`
-   - `DATABRICKS_HOST`
-   - `DATABRICKS_HTTP_PATH`
-   - `DATABRICKS_TOKEN`
-2. `pip install -r requirements.txt`
-3. `python scripts/ingest_hubspot_local.py`
-4. Run verify SQL in [`notebooks/sql/02_verify_bronze.sql`](notebooks/sql/02_verify_bronze.sql)
-
-Token stays on laptop — never commit `.env`.

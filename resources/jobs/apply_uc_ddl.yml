@@ -1,0 +1,36 @@
+# Applies uc/ddl/*.sql via Python (catalog rewritten from ${var.catalog}).
+# On-demand only — no schedule. Do not edit this Job in the UI.
+
+resources:
+  jobs:
+    apply_uc_ddl:
+      name: "[${bundle.target}] apply_uc_ddl"
+      description: >
+        Apply Unity Catalog DDL from Git (uc/ddl) into
+        ${var.catalog}.${var.bronze_schema}. Managed via Git/PR only.
+      tags:
+        managed_by: git
+        purpose: uc_ddl
+        catalog: ${var.catalog}
+
+      tasks:
+        - task_key: apply_ddl
+          spark_python_task:
+            python_file: ../../scripts/apply_uc_ddl.py
+            parameters:
+              - "--catalog"
+              - ${var.catalog}
+              - "--bronze-schema"
+              - ${var.bronze_schema}
+          environment_key: ddl_env
+
+      environments:
+        - environment_key: ddl_env
+          spec:
+            environment_version: "2"
+            dependencies:
+              - requests
+              - databricks-sql-connector
+              - python-dotenv
+              - PyYAML
+              - tabulate

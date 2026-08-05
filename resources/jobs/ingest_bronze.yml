@@ -1,0 +1,50 @@
+# Bronze ingest Job — serverless (required in this workspace).
+# Schedule + definition owned by Git only. Do not edit in the Jobs UI.
+# Secrets: scope `hubspot-crm` (dbutils in ingestion/config.py).
+# Catalog comes from bundle var (crm vs crm_dev) via --catalog.
+
+resources:
+  jobs:
+    ingest_bronze:
+      name: "[${bundle.target}] ingest_bronze"
+      description: >
+        HubSpot → ${var.catalog}.${var.bronze_schema} ingest
+        (SCD2 CRM objects + append dims/assocs). Serverless. Git/PR only.
+      tags:
+        managed_by: git
+        purpose: bronze_ingest
+        catalog: ${var.catalog}
+
+      schedule:
+        quartz_cron_expression: "0 0 6 * * ?"
+        timezone_id: America/Chicago
+        # Prod: UNPAUSED. Dev target overrides to PAUSED in databricks.yml.
+        pause_status: UNPAUSED
+
+      email_notifications:
+        on_failure:
+          - ${var.job_failure_email}
+
+      max_concurrent_runs: 1
+
+      tasks:
+        - task_key: ingest
+          spark_python_task:
+            python_file: ../../scripts/ingest_bronze.py
+            parameters:
+              - "--catalog"
+              - ${var.catalog}
+              - "--bronze-schema"
+              - ${var.bronze_schema}
+          environment_key: ingest_env
+
+      environments:
+        - environment_key: ingest_env
+          spec:
+            environment_version: "2"
+            dependencies:
+              - requests
+              - databricks-sql-connector
+              - python-dotenv
+              - PyYAML
+              - tabulate

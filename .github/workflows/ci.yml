@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, master, dev]
+  push:
+    branches: [main, master, dev]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Unit tests + UC DDL contract check
+        run: |
+          pytest tests/test_validators.py \
+            tests/test_uc_ddl_matches_specs.py \
+            tests/test_config_env.py \
+            tests/test_apply_uc_ddl_rewrite.py -q
+
+  bundle-validate:
+    runs-on: ubuntu-latest
+    # Requires repo secrets; skip gracefully if not configured.
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Databricks CLI
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
+          echo "$HOME/bin" >> "$GITHUB_PATH"
+
+      - name: Bundle validate (dev + prod)
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+        run: |
+          if [ -z "$DATABRICKS_HOST" ] || [ -z "$DATABRICKS_TOKEN" ]; then
+            echo "DATABRICKS_HOST/TOKEN secrets not set — skipping bundle validate"
+            exit 0
+          fi
+          databricks bundle validate -t dev
+          databricks bundle validate -t prod
