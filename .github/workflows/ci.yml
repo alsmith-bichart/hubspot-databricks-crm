@@ -1,5 +1,7 @@
 name: CI
 
+# Thin CI: unit tests only. Required before merge to dev / main.
+
 on:
   pull_request:
     branches: [main, master, dev]
@@ -19,32 +21,8 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Unit tests + UC DDL contract check
+      - name: Unit tests
         run: |
           pytest tests/test_validators.py \
-            tests/test_uc_ddl_matches_specs.py \
             tests/test_config_env.py \
             tests/test_apply_uc_ddl_rewrite.py -q
-
-  bundle-validate:
-    runs-on: ubuntu-latest
-    # Requires repo secrets; skip gracefully if not configured.
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Databricks CLI
-        run: |
-          curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
-          echo "$HOME/bin" >> "$GITHUB_PATH"
-
-      - name: Bundle validate (dev + prod)
-        env:
-          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
-          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
-        run: |
-          if [ -z "$DATABRICKS_HOST" ] || [ -z "$DATABRICKS_TOKEN" ]; then
-            echo "DATABRICKS_HOST/TOKEN secrets not set — skipping bundle validate"
-            exit 0
-          fi
-          databricks bundle validate -t dev
-          databricks bundle validate -t prod

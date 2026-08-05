@@ -8,7 +8,7 @@
 - UC bronze tables applied from Git (`uc/ddl`) — **ingest does not CREATE tables**
 - Permission to `CREATE CATALOG` (or pre-create `crm_dev`)
 
-Read [cicd_governance.md](cicd_governance.md) before changing production UC/Jobs.
+Read [operating_model.md](operating_model.md) for code vs UI and branch flow.
 
 ## Install
 
@@ -32,7 +32,7 @@ Put secrets in `configs/.env` (gitignored):
 Optional: `DATABRICKS_CATALOG` (default `crm`), `DATABRICKS_BRONZE_SCHEMA` (default `bronze`).  
 Use `crm_dev` for isolated local/dev work.
 
-### Databricks Job secrets (scheduled ingest)
+### Databricks Job secrets (UI)
 
 Jobs do **not** use `configs/.env`. Create secret scope `hubspot-crm` with:
 
@@ -86,17 +86,15 @@ python scripts/ingest_bronze.py --catalog crm_dev   # dev tables
 4. Owners, stages, associations → append
 5. Prints counts
 
-### Scheduled ingest (Databricks Job)
+### Databricks Job
 
-Job [`resources/jobs/ingest_bronze.yml`](../resources/jobs/ingest_bronze.yml):
+Job definition synced from Git; **schedule set in Jobs UI**.
 
-- **Compute:** serverless
-- **Prod (`main`):** daily **6:00 America/Chicago**, catalog `crm`
-- **Dev (`dev` branch):** schedule **PAUSED**, catalog `crm_dev`
-- **Secrets:** scope `hubspot-crm` via dbutils; catalog via Job `--catalog`
-- **Deploy:** push to `dev` or merge to `main` (GitHub Actions) — does **not** auto-run ingest
-- **Manual:** `databricks bundle run ingest_bronze -t prod --profile bicharttest`
-- **Do not** change schedule in Jobs UI — edit YAML + PR
+- Compute: serverless
+- Catalog: `crm` (main) / `crm_dev` (dev) via `--catalog`
+- Secrets: scope `hubspot-crm`
+- Deploy does not run ingest; re-run from UI or:
+  `databricks bundle run ingest_bronze -t prod --profile bicharttest`
 
 ### Bronze quality (sampled)
 
@@ -105,10 +103,10 @@ python tests/test_bronze_quality.py
 python tests/test_bronze_quality.py --limit 10
 ```
 
-### Unit / contract tests
+### Unit tests (CI)
 
 ```bash
-pytest tests/test_validators.py tests/test_uc_ddl_matches_specs.py -q
+pytest tests/test_validators.py tests/test_config_env.py tests/test_apply_uc_ddl_rewrite.py -q
 ```
 
 ## Destructive schema reset (manual)

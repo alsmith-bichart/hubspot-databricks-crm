@@ -1,9 +1,9 @@
-# Databricks Asset Bundle — UC schema/tables + Jobs (Git/PR only).
-# Docs: docs/cicd_governance.md
+# Minimal Asset Bundle: sync ingest code + Job definition (no schedule in Git).
+# Schedule: Databricks Jobs UI. Docs: docs/operating_model.md
 #
 # Targets (same workspace, separate catalogs):
-#   dev  → crm_dev.bronze  (branch: dev, GitHub env: development)
-#   prod → crm.bronze     (branch: main, GitHub env: production)
+#   dev  → crm_dev  (branch: dev)
+#   prod → crm      (branch: main, PR + approval)
 
 bundle:
   name: hubspot_databricks_crm
@@ -15,9 +15,6 @@ variables:
   bronze_schema:
     description: Bronze schema name
     default: bronze
-  warehouse_id:
-    description: SQL warehouse ID (optional; used by docs / local CLI)
-    default: ""
   job_failure_email:
     description: Email for ingest_bronze Job failure alerts
     default: data-eng@example.com
@@ -47,11 +44,6 @@ targets:
     variables:
       catalog: crm_dev
       bronze_schema: bronze
-    resources:
-      jobs:
-        ingest_bronze:
-          schedule:
-            pause_status: PAUSED
 
   prod:
     mode: production

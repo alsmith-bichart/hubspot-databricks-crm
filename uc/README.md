@@ -8,7 +8,7 @@ See [docs/cicd_governance.md](../docs/cicd_governance.md).
 
 - Do **not** create/alter production tables in Catalog Explorer
 - Change DDL under `uc/ddl/` on a branch; open a PR
-- Python column contract: [`schemas/object_specs.py`](../schemas/object_specs.py) — must stay in sync (enforced by `tests/test_uc_ddl_matches_specs.py`)
+- Column lists should stay aligned with [`schemas/object_specs.py`](../schemas/object_specs.py)
 
 ## Layout
 

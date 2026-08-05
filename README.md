@@ -1,32 +1,37 @@
 # HubSpot → Databricks CRM
 
-Bronze ingest (HubSpot → Unity Catalog) with Git-managed UC DDL and Databricks Jobs.
+Bronze ingest (HubSpot → Unity Catalog). Keep it simple: **ingest as code**, schedule/secrets in the UI.
 
-## Branches & environments
+## Branches
 
-| Branch | Bundle target | UC catalog |
+| Branch | Catalog | How |
 |---|---|---|
-| `dev` | `dev` | `crm_dev.bronze` |
-| `main` | `prod` | `crm.bronze` |
+| `dev` | `crm_dev` | Merge after CI |
+| `main` | `crm` | PR from `dev` + approval |
 
-Same Databricks workspace; catalogs isolate data. Only `main` deploys to prod (`crm`).  
-Secrets: repo-level Actions secrets (no GitHub Environments).
+## As code vs UI
 
-## Docs
+| Git | UI |
+|---|---|
+| Ingest Python | Warehouse, secrets |
+| Thin CI | Job schedule, re-run |
+| Deploy syncs Job files | Explore / query |
 
-See [docs/README.md](docs/README.md).
+Details: [docs/operating_model.md](docs/operating_model.md)
 
 ## Quick start
 
 ```bash
 pip install -r requirements.txt
 # fill configs/.env (gitignored)
-
-# Prod catalog
-python scripts/apply_uc_ddl.py --catalog crm
-python scripts/ingest_bronze.py --catalog crm
-
-# Dev catalog (isolated)
 python scripts/apply_uc_ddl.py --catalog crm_dev
 python scripts/ingest_bronze.py --catalog crm_dev
 ```
+
+## Docs
+
+[docs/README.md](docs/README.md)
+
+## Later
+
+dbt for staging / silver / gold — not started.

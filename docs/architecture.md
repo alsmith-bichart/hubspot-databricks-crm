@@ -56,7 +56,7 @@ flowchart TD
 | [`ingestion/validators.py`](../ingestion/validators.py) | Pre-load quality rules | Network / DB |
 | [`ingestion/bronze_loader.py`](../ingestion/bronze_loader.py) | Connect, assert tables exist, append INSERT, SCD2 stage+merge, post-load checks | CREATE TABLE / UC DDL |
 | [`uc/ddl/`](../uc/ddl/) | UC CREATE SCHEMA/TABLE source of truth | Runtime ingest path |
-| [`resources/`](../resources/) + [`databricks.yml`](../databricks.yml) | Bundle Jobs (serverless ingest) | Catalog Explorer / Jobs UI edits |
+| [`resources/`](../resources/) + [`databricks.yml`](../databricks.yml) | Bundle Job task (serverless); schedule in UI | — |
 
 | [`ingestion/pipeline.py`](../ingestion/pipeline.py) | Run sequence + logging | Low-level HTTP/SQL details |
 | [`utils/hubspot_client.py`](../utils/hubspot_client.py) | Re-export of client for smoke tests | Logic of its own |
