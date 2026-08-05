@@ -1,6 +1,0 @@
-requests
-databricks-sql-connector
-python-dotenv
-PyYAML
-tabulate
-pytest

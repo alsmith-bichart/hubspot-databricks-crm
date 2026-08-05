@@ -1,9 +1,9 @@
 .env
+configs/.env
+databricks_pipeline_venv/
 .venv/
-venv/
-*_venv/
-__pycache__/
-*.py[cod]
-.DS_Store
+.databricks/
 .pytest_cache/
-.mypy_cache/
+__pycache__/
+*.pyc
+.DS_Store
