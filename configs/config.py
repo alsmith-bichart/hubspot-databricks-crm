@@ -6,8 +6,9 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-ROOT = Path(__file__).resolve().parents[1]
-ENV_PATH = ROOT / "configs" / ".env"
+CONFIGS_DIR = Path(__file__).resolve().parent
+ENV_PATH = CONFIGS_DIR / ".env"
+ROOT = CONFIGS_DIR.parent
 
 
 @dataclass(frozen=True)
